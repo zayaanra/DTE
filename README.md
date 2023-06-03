@@ -17,6 +17,7 @@ This project will be a distributed text editor. Users (processes) can create tex
 - Back-End
   - Golang will be used a back-end. We'll use Gorilla for this. The back-end will receive edit messages and process them. It will send back "OK" messages if a user has permission to edit a document.
 - Project Layout
+```bash
 my-editor/
 ├── frontend/
 │   ├── app.py
@@ -40,3 +41,4 @@ my-editor/
 │   │   └── ...
 │   └── ...
 └── ...
+```
