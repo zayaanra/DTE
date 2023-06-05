@@ -1,4 +1,4 @@
-# DTE
+# RED
 ## Idea
 This project will be a distributed text editor. Users (processes) can create text files and edit them as desired. Users may also invite other users to edit the text file. Users that are not invited should not have permission to edit the text file.
 
