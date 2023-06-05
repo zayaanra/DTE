@@ -1,4 +1,4 @@
-package dte
+package red
 
 type Tester interface {
 	Add(x, y int) int

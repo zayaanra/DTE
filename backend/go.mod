@@ -1,3 +1,3 @@
-module github.com/zayaanra/DTE/backend
+module github.com/zayaanra/RED/backend
 
 go 1.20
