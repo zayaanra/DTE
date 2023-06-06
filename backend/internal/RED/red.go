@@ -9,7 +9,7 @@ import (
 	"github.com/zayaanra/RED/backend/api"
 )
 
-type Server struct {
+type RServer struct {
 	// The address for this server
 	addr string
 
@@ -27,7 +27,7 @@ func NewREDServer(addr string) (api.REDServer, error) {
 	if err != nil {
 		return nil, err
 	}
-	s := &Server{addr, ln}
+	rs := &RServer{addr, ln}
 	go func() {
 		for {
 			conn, err := ln.Accept()
@@ -41,16 +41,16 @@ func NewREDServer(addr string) (api.REDServer, error) {
 			log.Printf("Received a message: %v\n", bytes)
 		}
 	}()
-	return s, nil
+	return rs, nil
 }
 
-func (s *Server) Send(addr string) error {
+func (rs *RServer) Send(addr string) error {
 	return errors.New("TODO")
 }
 
-func (s *Server) Recv() {
+func (rs *RServer) Recv() {
 }
 
-func (s *Server) Terminate() {
-	s.ln.Close()
+func (rs *RServer) Terminate() {
+	rs.ln.Close()
 }
