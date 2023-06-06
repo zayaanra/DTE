@@ -3,7 +3,7 @@ RED is a **R**eal-time **E**diting **D**istribution software.
 ## Installation
 1. Make sure you have `Go (most recent version)` installed.
 2. You also need to have protobuf installed:
-`go get google.golang.org/protobuf`
+`go get google.golang.org/protobuf` and
 `go get google.golang.org/protobuf/proto`
 
 ## Idea
