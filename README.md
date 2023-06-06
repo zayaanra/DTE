@@ -3,8 +3,8 @@ RED is a **R**eal-time **E**diting **D**istribution software.
 ## Installation
 1. Make sure you have `Go (most recent version)` installed.
 2. You also need to have protobuf installed:
-`go get google.golang.org/protobuf
-go get google.golang.org/protobuf/proto`
+`go get google.golang.org/protobuf`
+`go get google.golang.org/protobuf/proto`
 
 ## Idea
 This project will be a distributed text editor. Users (processes) can create text files and edit them as desired. Users may also invite other users to edit the text file. Users that are not invited should not have permission to edit the text file.
