@@ -1,3 +1,4 @@
 cmd/server/server
 
-go.sum
+backend/api/messages.pb.go
+backend/go.sum

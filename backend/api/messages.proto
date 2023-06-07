@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package api;
 
-option go_package = "github.com/zayaanra/RED/backend";
+option go_package = "github.com/zayaanra/RED/backend/api";
 
 // Denotes what type of EDIT is being applied.
 // There are only two types possible, inserting a character or deleting a character.
@@ -27,8 +27,8 @@ enum MessageType {
 // Represents the change applied to a document (an edit) 
 message Edit {
   EditType type = 1;
-  int pos = 2;
-  byte char = 3;
+  int32 pos = 2;
+  int32 char = 3;
 }
 
 // Represents a message sent from a REDServer
@@ -38,10 +38,10 @@ message REDMessage {
   MessageType type = 1;
 
   // Indiciates the sender of this message. All messages must have this field.
-  int sender = 2;
+  int32 sender = 2;
 
   // Indicates the receipient of this message. All messages must have this field.
-  int receipient = 3;
+  int32 receipient = 3;
 
   // Represents the change being applied to a document. Only EDIT messages have this field.
   Edit edit = 4;
