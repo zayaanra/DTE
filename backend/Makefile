@@ -5,7 +5,7 @@ all:	api/messages.pb.go
 	cd $(CMD); go build;
 
 test:
-	cd $(TESTS); go test;
+	go test github.com/zayaanra/RED/backend/tests/handler
 
 %.pb.go: %.proto
 	protoc --go_out=. --go_opt=paths=source_relative $<
