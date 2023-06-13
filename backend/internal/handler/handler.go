@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"net"
-	"io"
 	"encoding/binary"
+	"io"
+	"net"
+
 	"github.com/golang/protobuf/proto"
-	
+
 	"github.com/zayaanra/RED/backend/api"
 )
 
@@ -14,8 +15,7 @@ type Handler struct {
 	ln net.Listener
 
 	// Received messages are put onto this channel
-	msgChan chan *api.REDMessage
-	
+	M chan *api.REDMessage
 }
 
 // Create a new handler that gets attached to the given address.
@@ -26,10 +26,10 @@ func NewHandler(addr string) (*Handler, error) {
 		return nil, err
 	}
 	msgChan := make(chan *api.REDMessage)
-	h := &Handler{ln, msgChan}
+	h := &Handler{ln: ln, M: msgChan}
 
 	go h.Handle()
-	
+
 	return h, nil
 }
 
@@ -62,7 +62,7 @@ func (h *Handler) Send(msg *api.REDMessage, addr string) error {
 	return nil
 }
 
-// Receives a message and then places it on the msgChan. 
+// Receives a message and then places it on the msgChan.
 func (h *Handler) Recv(conn net.Conn) {
 	// When we receive a message, we have to parse the header so we know how many bytes to read.
 	header := make([]byte, 2)
@@ -70,7 +70,7 @@ func (h *Handler) Recv(conn net.Conn) {
 	if err != nil {
 		return
 	}
-	
+
 	// The header is created as an unsigned 16-bit integer in little endian
 	length := binary.LittleEndian.Uint16(header)
 	buffer := make([]byte, length)
@@ -78,11 +78,11 @@ func (h *Handler) Recv(conn net.Conn) {
 	if err != nil {
 		return
 	}
-	
+
 	// Unmarshal the message
 	rmsg := &api.REDMessage{}
 	if err := proto.Unmarshal(buffer, rmsg); err == nil {
-		h.msgChan <- rmsg
+		h.M <- rmsg
 	}
 }
 
@@ -91,7 +91,7 @@ func (h *Handler) Handle() {
 	for {
 		conn, err := h.ln.Accept()
 		if err != nil {
-			return;
+			return
 		}
 		defer conn.Close()
 		h.Recv(conn)

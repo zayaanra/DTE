@@ -1,11 +1,9 @@
 package red
 
 import (
-	
 	"github.com/zayaanra/RED/backend/api"
 	"github.com/zayaanra/RED/backend/internal/handler"
 )
-
 
 type RServer struct {
 	// The address for this server
@@ -26,7 +24,6 @@ func NewREDServer(addr string) (api.REDServer, error) {
 	rs := &RServer{addr, rh}
 	return rs, nil
 }
-
 
 // Terminates the REDServer. It closes any resources that are currently being used.
 func (rs *RServer) Terminate() {
