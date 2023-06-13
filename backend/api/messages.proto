@@ -38,10 +38,10 @@ message REDMessage {
   MessageType type = 1;
 
   // Indiciates the sender of this message. All messages must have this field.
-  int32 sender = 2;
+  string sender = 2;
 
   // Indicates the receipient of this message. All messages must have this field.
-  int32 receipient = 3;
+  string receipient = 3;
 
   // Represents the change being applied to a document. Only EDIT messages have this field.
   Edit edit = 4;
