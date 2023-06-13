@@ -4,7 +4,7 @@ TESTS := tests
 all:	api/messages.pb.go
 	cd $(CMD); go build;
 
-test:
+test:	all
 	go test github.com/zayaanra/RED/backend/tests/handler
 
 %.pb.go: %.proto
