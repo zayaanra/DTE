@@ -101,5 +101,4 @@ func (h *Handler) Handle() {
 // Closes any resources that are currently in use by this Handler
 func (h *Handler) Terminate() {
 	h.ln.Close()
-	close(h.msgChan)
 }
