@@ -63,5 +63,5 @@ func TestSendEditDELETE(t *testing.T) {
 	err := rh1.Send(smsg, rh2_addr)
 	if err != nil {
 		t.Errorf("Sending an EDIT of type DELETE failed")
-	}	
+	}
 }
