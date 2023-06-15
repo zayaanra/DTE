@@ -1,6 +1,8 @@
 package red
 
 import (
+	"net/http"
+
 	"github.com/zayaanra/RED/backend/api"
 	"github.com/zayaanra/RED/backend/internal/handler"
 )
@@ -17,6 +19,9 @@ type RServer struct {
 // The newly created RED server begins send or receive messages immedaiately.
 // This function returns an error if the server was not able to be created.
 func NewREDServer(addr string) (api.REDServer, error) {
+	// We'll use port 8080 for HTTP requests and a user-chosen port for incoming network connections/proto3 messages.
+	http.Handle("/", http.FileServer(http.Dir("../frontend/")))
+	go http.ListenAndServe(":8080", nil)
 	rh, err := handler.NewHandler(addr)
 	if err != nil {
 		return nil, err

@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/binary"
 	"io"
+	"log"
 	"net"
 
 	"github.com/golang/protobuf/proto"
@@ -78,6 +79,8 @@ func (h *Handler) Recv(conn net.Conn) {
 	if err != nil {
 		return
 	}
+
+	log.Println(buffer)
 
 	// Unmarshal the message
 	rmsg := &api.REDMessage{}
