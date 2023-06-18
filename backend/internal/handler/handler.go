@@ -100,6 +100,7 @@ func (h *Handler) Handle() {
 
 // Closes any resources that are currently in use by this Handler
 func (h *Handler) Terminate() {
+	// TODO - this is breaking things
+	// h.M <- nil
 	h.ln.Close()
-	h.M <- nil
 }
