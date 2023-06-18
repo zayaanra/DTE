@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/binary"
 	"io"
-	"log"
 	"net"
 
 	"github.com/golang/protobuf/proto"
@@ -80,8 +79,6 @@ func (h *Handler) Recv(conn net.Conn) {
 		return
 	}
 
-	log.Println(buffer)
-
 	// Unmarshal the message
 	rmsg := &api.REDMessage{}
 	if err := proto.Unmarshal(buffer, rmsg); err == nil {
@@ -104,4 +101,5 @@ func (h *Handler) Handle() {
 // Closes any resources that are currently in use by this Handler
 func (h *Handler) Terminate() {
 	h.ln.Close()
+	h.M <- nil
 }
