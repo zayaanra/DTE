@@ -7,7 +7,7 @@ RED is a **R**eal-time **E**diting **D**istribution software.
 `go get google.golang.org/protobuf/proto`
 
 ## Idea
-This project will be a distributed text editor. Users (processes) can create text files and edit them as desired. Users may also invite other users to edit the text file. Users that are not invited should not have permission to edit the text file.
+This project will be a distributed text editor. Users (processes) can create text files and edit them as desired. Users may also invite other users to edit the text file. Users that are not invited should not have permission to edit the text file. For now, servers can only be hosted locally (from the same machine).
 
 ## Concerns
 1. What happens when a process fails?
@@ -20,32 +20,7 @@ This project will be a distributed text editor. Users (processes) can create tex
 
 ## Implementation
 - Front-End
-  - Python will be used a front-end. We'll use HTML/CSS and PyScript. The front-end will begin the GUI process. Users can (visually) edit documents from here.
+  - We'll use a simple GUI built in Golang. Users can choose a port (hosted locally) to start their server on. Users can also invite other peers once the server is started.
 - Back-End
   - Golang will be used a back-end. We'll use Gorilla for this. The back-end will receive edit messages and process them. It will send back "OK" messages if a user has permission to edit a document.
 - Project Layout
-```bash
-my-editor/
-├── frontend/
-│   ├── app.py
-│   ├── templates/
-│   │   ├── index.html
-│   │   └── ...
-│   ├── static/
-│   │   ├── css/
-│   │   │   └── style.css
-│   │   ├── js/
-│   │   │   └── script.js
-│   │   └── ...
-│   └── ...
-├── backend/
-│   ├── main.go
-│   ├── api/
-│   │   ├── handlers.go
-│   │   └── ...
-│   ├── models/
-│   │   ├── document.go
-│   │   └── ...
-│   └── ...
-└── ...
-```
