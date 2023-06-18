@@ -5,6 +5,8 @@ RED is a **R**eal-time **E**diting **D**istribution software.
 2. You also need to have protobuf installed:
 `go get google.golang.org/protobuf` and
 `go get google.golang.org/protobuf/proto`
+3. `sudo apt-get install libgtk2.0-dev libglib2.0-dev libgtksourceview2.0-dev`
+4. `go get github.com/mattn/go-gtk/gtk`
 
 ## Idea
 This project will be a distributed text editor. Users (processes) can create text files and edit them as desired. Users may also invite other users to edit the text file. Users that are not invited should not have permission to edit the text file. For now, servers can only be hosted locally (from the same machine).
