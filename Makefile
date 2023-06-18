@@ -1,4 +1,5 @@
 CMD := cmd/server
+GUI := gui
 TESTS := tests
 
 all:	api/messages.pb.go

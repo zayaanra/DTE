@@ -1,4 +1,4 @@
-backend/cmd/server/server
+cmd/server/server
 
-backend/api/messages.pb.go
-backend/go.sum
+api/messages.pb.go
+go.sum

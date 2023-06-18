@@ -1,5 +1,0 @@
-package gui
-
-func main() {
-
-}
