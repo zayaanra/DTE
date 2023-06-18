@@ -2,5 +2,3 @@ backend/cmd/server/server
 
 backend/api/messages.pb.go
 backend/go.sum
-
-frontend/messages_pb2.py
