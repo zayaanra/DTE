@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package api;
+
+// Denotes what type of EDIT is being applied.
+// There are only two types possible, inserting a character or deleting a character.
+enum EditType {
+    INSERT = 0;
+    DELETE = 1;
+  }
+  
+  // Denotes which type of RPC the message is
+  enum MessageType {
+    // EDIT is a message representating any change made to a document by a user.
+    // It is sent to  all other peers involved with said document.
+    EDIT = 0;
+    
+    // INVITE is a message representing an invitation from the owner of one document to another peer.
+    // It is used to allow other peers to join a single editing session.
+    // For the purposes of this project, the sender of this message does not care if the receiver can actually accept this invitation. 
+    // It is up to the user to retry the attempt.
+    INVITE = 1;
+  }
+  
+  // Represents the change applied to a document (an edit) 
+  message Edit {
+    EditType type = 1;
+    int32 pos = 2;
+    int32 char = 3;
+  }
+  
+  // Represents a message sent from a REDServer
+  // The contents of this changes depending on what type of message is being sent.
+  message REDMessage {
+    // Indicates the type of message that is being sent. All messages must have this field.
+    MessageType type = 1;
+  
+    // Indiciates the sender of this message. All messages must have this field.
+    string sender = 2;
+  
+    // Indicates the receipient of this message. All messages must have this field.
+    string receipient = 3;
+  
+    // Represents the change being applied to a document. Only EDIT messages have this field.
+    Edit edit = 4;
+  }
