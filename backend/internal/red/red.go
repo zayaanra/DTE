@@ -1,6 +1,7 @@
 package red
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/zayaanra/RED/backend/api"
@@ -26,6 +27,18 @@ func NewREDServer(addr string) (api.REDServer, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	go func(rh *handler.Handler) {
+		for {
+			select {
+			case rmsg := <-rh.M:
+				if rmsg == nil {
+					return
+				}
+				log.Printf("Received message: %v\n", rmsg)
+			}
+		}
+	}(rh)
 	rs := &RServer{addr, rh}
 	return rs, nil
 }
