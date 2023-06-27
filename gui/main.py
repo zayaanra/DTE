@@ -9,20 +9,43 @@ class SocketServer():
     # TODO
     def __init__(self):
         self.socket = None
+
+# ServerWindow class. It's opened when a user begins a new RED server.
+class ServerWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.server = None
+
+
+        self.x, self.y, self.aw, self.ah, = 100, 300, 300, 150
+        self.run()
+    
+    def run(self):
+        self.setMinimumSize(QSize(320, 140))
+        self.setWindowTitle("RED")
+
+        # TODO - need to create a toolbar
+        self.toolbar = QToolBar("Test")
+        self.toolbar.show()
+
+        self.document = QPlainTextEdit(self)
+        self.document.resize(QSize(320, 140))
+
         
 
 # Main GUI application
-class App(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.server = SocketServer()
+        self.serverWindow = None
+
         self.x, self.y, self.aw, self.ah, = 100, 300, 300, 150
         self.run()
 
     def run(self):
         # self.setGeometry(self.x, self.y, self.aw, self.ah)
         self.setMinimumSize(QSize(320, 140))
-        self.setWindowTitle("RED")
+        self.setWindowTitle("Configuration")
         
         self.hostLabel = QLabel('IP Address:', self)
         self.hostBox = QLineEdit(self)
@@ -46,9 +69,12 @@ class App(QMainWindow):
     # Spawns a Golang process to start the backend server
     def spawn(self):
         # TODO
-        print("Button clicked")
+        ipAddr = f"{self.hostBox.text()}:{self.portBox.text()}"
+        print(f"Server starting under {ipAddr}")
+        self.serverWindow = ServerWindow()
+        self.serverWindow.show()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    gui = App()
+    gui = MainWindow()
     sys.exit(app.exec_())
