@@ -22,6 +22,10 @@ enum MessageType {
   // For the purposes of this project, the sender of this message does not care if the receiver can actually accept this invitation. 
   // It is up to the user to retry the attempt.
   INVITE = 1;
+
+  // KILL is a message representing the command to kill the Golang server.
+  // Upon receiving it, the server should immedately shutdown and release any resources currently being used.option
+  KILL = 2;
 }
 
 // Represents the change applied to a document (an edit) 
