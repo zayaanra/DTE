@@ -1,4 +1,6 @@
 cmd/server/server
 
 api/messages.pb.go
+gui/messages_pb2.py
+gui/__pycache__
 go.sum
