@@ -44,10 +44,12 @@ class ServerWindow(QWidget):
             print(f"Server starting under {self.ipAddr}")
             exec = "../cmd/server/server"
             self.process = QProcess()
-            self.process.readyReadStandardOutput.connect(self.handleStdout)
-            self.process.readyReadStandardError.connect(self.handleStderr)
+            self.process.readyReadStandardOutput.connect(lambda: print(self.process.readAllStandardOutput().data().decode()))
+            self.process.readyReadStandardError.connect(lambda: print(self.process.readAllStandardError().data().decode()))
             self.process.finished.connect(self.destroy)
-            self.process.start(exec, [self.ipAddr])
+            self.process.setProgram(exec)
+            self.process.setArguments([self.ipAddr])
+            self.process.start()
 
 
     # Fetches updates from the text editor
@@ -56,26 +58,19 @@ class ServerWindow(QWidget):
         text = self.document.toPlainText()
         print(text)
     
-    def handleStdout(self):
-        data = self.process.readAllStandardOutput()
-        stderr = bytes(data).decode("utf8")
-        print(stderr)
-
-    def handleStderr(self):
-        data = self.process.readAllStandardError()
-        stderr = bytes(data).decode("utf8")
-        print(stderr)
-    
     def sendKill(self):
         # TODO - not sure if im correctly creating these messages
         smsg = messages_pb2.REDMessage()
         smsg.type = messages_pb2.KILL
+        
+        b = smsg.SerializeToString()
 
         # TODO - figure out how to connect to the ip address and send protobuf message
-        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-        # s.connect(("localhost", 3000))
-        # s.send(smsg.SerializeToString())
-        # s.close()
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host, port = self.ipAddr.split(":")
+        s.connect((host, int(port)))
+        s.send(b)
+        s.close()
 
     # Destroy the server once it's been terminated
     def destroy(self):
