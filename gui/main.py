@@ -5,12 +5,30 @@ from PyQt5.QtWidgets import *
 import sys
 import socket
 import messages_pb2
+import struct
 
 # SocketServer class. This will be used to send proto3 messages to the Golang backend.
 class SocketServer():
-    # TODO
-    def __init__(self):
-        self.socket = None
+    def __init__(self, ipAddress):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.ipAddr = ipAddress
+        self.host, self.port = self.ipAddr.split(":")
+        self.port = int(self.port)
+
+    # Sends the given message to the provided address
+    def send(self, smsg):
+        self.socket.connect((self.host, self.port))
+        self.socket.send(smsg)
+    
+    # TODO - Receives a message
+    def recv(self):
+        pass
+
+    # Closes the socket
+    def close(self):
+        self.socket.close()
+
+        
 
 # ServerWindow class. It's opened when a user begins a new RED server.
 class ServerWindow(QWidget):
@@ -59,18 +77,16 @@ class ServerWindow(QWidget):
         print(text)
     
     def sendKill(self):
-        # TODO - not sure if im correctly creating these messages
+        # Create a protobuf message and pack the header into it
+        # This is the equivalent of marshalling/unmarshalling we do on the backend
         smsg = messages_pb2.REDMessage()
         smsg.type = messages_pb2.KILL
-        
-        b = smsg.SerializeToString()
+        raw = smsg.SerializeToString()
+        encoded = struct.pack('<H', len(raw)) + raw
 
-        # TODO - figure out how to connect to the ip address and send protobuf message
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host, port = self.ipAddr.split(":")
-        s.connect((host, int(port)))
-        s.send(b)
-        s.close()
+        self.server = SocketServer(self.ipAddr)
+        self.server.send(encoded)
+        self.server.close()
 
     # Destroy the server once it's been terminated
     def destroy(self):
