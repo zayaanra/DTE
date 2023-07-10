@@ -18,7 +18,7 @@ type RServer struct {
 // Create a new RED server associated with the given address.
 // The newly created RED server begins send or receive messages immedaiately.
 // This function returns an error if the server was not able to be created.
-func NewREDServer(addr string, exit chan bool) (api.REDServer, error) {
+func NewREDServer(addr string) (api.REDServer, error) {
 	rh, err := handler.NewHandler(addr)
 	if err != nil {
 		return nil, err
@@ -28,9 +28,8 @@ func NewREDServer(addr string, exit chan bool) (api.REDServer, error) {
 		for {
 			select {
 			case rmsg := <-rh.M:
-				if rmsg == nil || rmsg.Type == api.MessageType_KILL {
+				if rmsg == nil {
 					log.Println("Killing server...")
-					exit <- true
 					return
 				}
 				log.Printf("Received message: %v\n", rmsg)
