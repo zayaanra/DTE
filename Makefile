@@ -14,7 +14,7 @@ test:	all
 
 .PHONY: clean
 clean:
-	rm -f $(CMD)/server api/messages.pb.go gui/messages_pb2.py
+	rm -f $(CMD)/server $(CMD)/qtbox api/messages.pb.go gui/messages_pb2.py
 	find . -name '*~' -delete
 	cd $(TESTS); go clean -testcache
 

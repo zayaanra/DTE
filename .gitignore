@@ -1,4 +1,5 @@
 cmd/server/server
+cmd/server/qtbox
 
 api/messages.pb.go
 gui/messages_pb2.py
