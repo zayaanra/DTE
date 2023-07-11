@@ -9,7 +9,7 @@ import (
 	"github.com/zayaanra/RED/internal/red"
 )
 
-// Runs the server
+// Creates the REDServer and begins listening for incoming messages
 func run() {
 	// TODO - everything below here is the actual server code, it will be used once user clicks server start button
 	if len(os.Args) != 2 {
@@ -29,6 +29,10 @@ func run() {
 	}
 }
 
+func fetch(text string) {
+	log.Println()
+}
+
 // This command starts a server (e.g. a peer) in our network.
 // Any peer is capable of sending/receiving a message.
 func main() {
@@ -36,7 +40,7 @@ func main() {
 	app := widgets.NewQApplication(0, nil)
 
 	window := widgets.NewQMainWindow(nil, 0)
-	window.SetWindowTitle("Server Configuration")
+	window.SetWindowTitle("RED Editor")
 	window.SetMinimumSize2(400, 300)
 
 	layout := widgets.NewQVBoxLayout()
@@ -44,20 +48,27 @@ func main() {
 	widget.SetLayout(layout)
 	window.SetCentralWidget(widget)
 
-	label := widgets.NewQLabel2("Server Response:", nil, 0)
-	layout.AddWidget(label, 0, 0)
-
-	button := widgets.NewQPushButton2("Send Request", nil)
-	layout.AddWidget(button, 0, 0)
-
-	serverButton := widgets.NewQPushButton2("Start Server", nil)
-	layout.AddWidget(serverButton, 0, 0)
-
-	serverButton.ConnectClicked(func(bool) {
-		log.Println("Running server...")
-		serverButton.SetEnabled(false)
-		go run()
+	document := widgets.NewQPlainTextEdit2("", nil)
+	document.ConnectTextChanged(func() {
+		s := document.ToPlainText()
+		log.Println(s)
 	})
+
+	invite := widgets.NewQPushButton2("Invite", nil)
+	invite.ConnectClicked(func(bool) {
+		configWindow := widgets.NewQDialog(nil, 0)
+		configWindow.SetWindowTitle("Invite Configuration")
+		configWindow.SetModal(true)
+		configWindow.SetFixedSize2(300, 100)
+		configWindow.Show()
+	})
+
+	layout.AddWidget(invite, 0, 0)
+	layout.AddWidget(document, 0, 0)
+
+	// Run the server
+	log.Println("Running server...")
+	go run()
 
 	// Start the GUI
 	window.Show()
