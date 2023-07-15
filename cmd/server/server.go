@@ -94,7 +94,7 @@ func main() {
 		btn := widgets.NewQPushButton2("Invite", nil)
 		btn.ConnectClicked(func(bool) {
 			addr := hostEntry.Text() + ":" + portEntry.Text()
-			rs.Invite(addr)
+			rs.Invite(addr, document)
 		})
 		layout.AddWidget(btn, 0, 0)
 
