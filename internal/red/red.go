@@ -13,6 +13,9 @@ type RServer struct {
 
 	// The handler for this server
 	handler *handler.Handler
+
+	// List of peers that are connected to this REDServer's editing session
+	peers []string
 }
 
 // Create a new RED server associated with the given address.
@@ -24,6 +27,8 @@ func NewREDServer(addr string) (api.REDServer, error) {
 		return nil, err
 	}
 
+	peers := []string{}
+	rs := &RServer{addr, rh, peers}
 	go func(rh *handler.Handler) {
 		for {
 			select {
@@ -32,12 +37,32 @@ func NewREDServer(addr string) (api.REDServer, error) {
 					log.Println("Killing server...")
 					return
 				}
-				log.Printf("Received message: %v\n", rmsg)
+				if rmsg.Type == api.MessageType_INVITE {
+					log.Printf("%s accepted an INVITE from %s\n", rs.addr, rmsg.Sender)
+					rs.peers = append(rs.peers, rmsg.Sender)
+				}
 			}
 		}
 	}(rh)
-	rs := &RServer{addr, rh}
 	return rs, nil
+}
+
+// Invites a peer to their editing session by sending an INVITE message.
+func (rs *RServer) Invite(addr string) error {
+	log.Printf("%s is sending an INVITE to %s\n", rs.addr, addr)
+	smsg := &api.REDMessage{Type: api.MessageType_INVITE, Sender: rs.addr, Receipient: addr}
+	err := rs.handler.Send(smsg, addr)
+	rs.peers = append(rs.peers, addr)
+	return err
+}
+
+// Accepts an invitation from a peer.
+func (rs *RServer) Accept() {
+}
+
+// Notifies all peers in this editing session of an EDIT
+func (rs *RServer) Notify() {
+	// TODO - for now, we'll just send the entire text document and have the peer on the other update it's GUI
 }
 
 // Terminates the REDServer. It closes any resources that are currently being used.
