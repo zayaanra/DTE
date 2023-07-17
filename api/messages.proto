@@ -49,4 +49,7 @@ message REDMessage {
 
   // Represents the change being applied to a document. Only EDIT messages have this field.
   Edit edit = 4;
+
+  // Represents the text of the sender's document. Only EDIT and INVITE messages have this field.
+  string text = 5;
 }
