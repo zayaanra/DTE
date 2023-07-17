@@ -15,7 +15,11 @@ type REDServer interface {
 
 	// Notifies all peers within this server's editing session of an update to the text editor.
 	// It sends an EDIT message containing the edits
-	Notify()
+	Notify(text string)
+
+	// Fetches the most recent update needed for the GUI. It returns a bool denoting if it possible to fetch said update.
+	// It's only not possible when the server has been terminated.
+	Fetch() (text string, terminated bool)
 
 	// Terminate the server, closing the listening socket on this server.
 	Terminate()
