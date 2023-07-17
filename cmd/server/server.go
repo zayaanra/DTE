@@ -18,7 +18,8 @@ func run(comms chan<- api.REDServer) {
 	} else {
 		// Parse the port and start a REDServer under that port
 		addr := os.Args[1]
-		rs, err := red.NewREDServer(addr)
+		updates := make(chan string)
+		rs, err := red.NewREDServer(addr, updates)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "REDServer failed to start up")
 			comms <- nil
@@ -46,6 +47,18 @@ func boot() api.REDServer {
 	return rs
 }
 
+// Refreshes the GUI for the latest updates to it
+func refresh(doc *widgets.QPlainTextEdit, rs api.REDServer) {
+	for {
+		newText, _ := rs.Fetch()
+		// If the server has been terminated, return immediately.
+		// if terminated {
+		// 	return
+		// }
+		doc.SetPlainText(newText)
+	}
+}
+
 // This command starts a server (e.g. a peer) in our network.
 // Any peer is capable of sending/receiving a message.
 func main() {
@@ -69,7 +82,7 @@ func main() {
 	document := widgets.NewQPlainTextEdit2("", nil)
 	document.ConnectTextChanged(func() {
 		s := document.ToPlainText()
-		log.Println(s)
+		rs.Notify(s)
 	})
 
 	invite := widgets.NewQPushButton2("Invite", nil)
@@ -104,6 +117,8 @@ func main() {
 
 	layout.AddWidget(invite, 0, 0)
 	layout.AddWidget(document, 0, 0)
+
+	go refresh(document, rs)
 
 	// Start the GUI
 	window.Show()
