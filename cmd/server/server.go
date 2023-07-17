@@ -49,13 +49,9 @@ func boot() api.REDServer {
 
 // Refreshes the GUI for the latest updates to it
 func refresh(doc *widgets.QPlainTextEdit, rs api.REDServer) {
-	for {
-		newText, _ := rs.Fetch()
-		// If the server has been terminated, return immediately.
-		// if terminated {
-		// 	return
-		// }
-		doc.SetPlainText(newText)
+	updates := rs.Fetch()
+	for text := range updates {
+		log.Println(text)
 	}
 }
 

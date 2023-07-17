@@ -19,7 +19,7 @@ type REDServer interface {
 
 	// Fetches the most recent update needed for the GUI. It returns a bool denoting if it possible to fetch said update.
 	// It's only not possible when the server has been terminated.
-	Fetch() (text string, terminated bool)
+	Fetch() (updates chan string)
 
 	// Terminate the server, closing the listening socket on this server.
 	Terminate()

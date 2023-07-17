@@ -67,7 +67,7 @@ func NewREDServer(addr string, updates chan string) (api.REDServer, error) {
 
 // Invites a peer to their editing session by sending an INVITE message.
 func (rs *RServer) Invite(addr string, doc *widgets.QPlainTextEdit) error {
-	smsg := &api.REDMessage{Type: api.MessageType_INVITE, Sender: rs.addr, Receipient: addr, Text: doc.ToPlainText()}
+	smsg := &api.REDMessage{Type: api.MessageType_INVITE, Sender: rs.addr, Receipient: addr}
 	err := rs.handler.Send(smsg, addr)
 	rs.peers = append(rs.peers, addr)
 
@@ -99,13 +99,14 @@ func (rs *RServer) Notify(text string) {
 }
 
 // Fetches the most recent text updates needed for the GUI.
-func (rs *RServer) Fetch() (text string, terminated bool) {
-	return <-rs.updates, rs.terminated
+func (rs *RServer) Fetch() (updates chan string) {
+	return rs.updates
 }
 
 // Terminates the REDServer. It closes any resources that are currently being used.
 func (rs *RServer) Terminate() {
 	rs.terminated = true
-	rs.session.Close()
+	close(rs.updates)
+	// rs.session.Close()
 	rs.handler.Terminate()
 }
