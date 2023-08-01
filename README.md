@@ -6,14 +6,5 @@ RED is a **R**eal-time **E**diting **D**istribution software.
 `go get google.golang.org/protobuf` and
 `go get google.golang.org/protobuf/proto`
 
-## Idea
-This project will be a distributed text editor. Users (processes) can create text files and edit them as desired. Users may also invite other users to edit the text file. Users that are not invited should not have permission to edit the text file. For now, servers can only be hosted locally (from the same machine).
-
-## Concerns
-1. What happens when a process fails?
-2. Are there any distributed systems protocols that could be useful here? (for example, a consensus algorithm may be useful so that participating users agree on the state of the document)
-
-## Notes
-1. If a user saves a document, then the document should be saved for all participating users on that document.
-2. Only the user who created the document may delete it. If a document is deleted, then all participating users on that document should not be able to access that document.
-3. We may use a consensus algorithm so that the set of participating users for a document agree on the state of the document at any given time.
+## How it works
+Upon launching the GUI, users (processes) are given a blank text editor to work with. This serves as their "document". They can freely edit this document. To colloborate with other users, they must know the addresses of those users in order to communicate with them. This involves sending that user an invite upon which the receiveing user will be granted access to edit the now shared document. If the invited user has a document of their own, it will be wiped in order to connect with the document of the inviter.
