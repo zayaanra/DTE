@@ -3,6 +3,7 @@ package red
 import (
 	"log"
 
+	"fyne.io/fyne/v2/widget"
 	"github.com/therecipe/qt/widgets"
 	"github.com/zayaanra/RED/api"
 	"github.com/zayaanra/RED/internal/handler"
@@ -66,16 +67,16 @@ func NewREDServer(addr string, updates chan string) (api.REDServer, error) {
 }
 
 // Invites a peer to their editing session by sending an INVITE message.
-func (rs *RServer) Invite(addr string, doc *widgets.QPlainTextEdit) error {
+func (rs *RServer) Invite(addr string, doc *widget.Entry) error {
 	smsg := &api.REDMessage{Type: api.MessageType_INVITE, Sender: rs.addr, Receipient: addr}
 	err := rs.handler.Send(smsg, addr)
 	rs.peers = append(rs.peers, addr)
 
 	// An editing session is only opened when more than one user is participating in it.
 	// It cannot be opened more than once.
-	if rs.session == nil {
-		rs.Open(doc)
-	}
+	// if rs.session == nil {
+	// 	rs.Open(doc)
+	// }
 
 	return err
 }

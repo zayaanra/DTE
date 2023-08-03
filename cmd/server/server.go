@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
-	"github.com/therecipe/qt/widgets"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 	"github.com/zayaanra/RED/api"
 	"github.com/zayaanra/RED/internal/red"
 )
 
-// Creates the REDServer and begins listening for incoming messages
 func run(comms chan<- api.REDServer) {
-	// TODO - everything below here is the actual server code, it will be used once user clicks server start button
+	// TODO - everything below here is the actual server code, it will be used once the user clicks the server start button
 	if len(os.Args) != 2 {
 		fmt.Fprintf(os.Stderr, "usage: ./server port")
 	} else {
@@ -35,7 +38,6 @@ func run(comms chan<- api.REDServer) {
 	}
 }
 
-// Boot REDServer (initialization)
 func boot() api.REDServer {
 	comms := make(chan api.REDServer)
 
@@ -47,77 +49,55 @@ func boot() api.REDServer {
 	return rs
 }
 
-// Refreshes the GUI for the latest updates to it
-func refresh(doc *widgets.QPlainTextEdit, rs api.REDServer) {
+func refresh(doc *widget.Entry, rs api.REDServer) {
 	updates := rs.Fetch()
 	for text := range updates {
-		log.Println(text)
+		doc.SetText(text)
 	}
 }
 
-// This command starts a server (e.g. a peer) in our network.
-// Any peer is capable of sending/receiving a message.
 func main() {
 	rs := boot()
 	if rs == nil {
 		os.Exit(1)
 	}
 
-	// To test locally, the user should input two arguments to the command line (executable and the port, e.g. "localhost:3000")
-	app := widgets.NewQApplication(0, nil)
+	a := app.New()
+	w := a.NewWindow("RED Editor")
 
-	window := widgets.NewQMainWindow(nil, 0)
-	window.SetWindowTitle("RED Editor")
-	window.SetMinimumSize2(400, 300)
+	document := widget.NewMultiLineEntry()
+	document.OnChanged = func(s string) {
+		rs.Notify(strings.TrimSpace(s))
+	}
 
-	layout := widgets.NewQVBoxLayout()
-	widget := widgets.NewQWidget(nil, 0)
-	widget.SetLayout(layout)
-	window.SetCentralWidget(widget)
+	invite := widget.NewButton("Invite", func() {
+		configWindow := a.NewWindow("Invite Configuration")
+		size := fyne.NewSize(300, 150)
+		configWindow.Resize(size)
 
-	document := widgets.NewQPlainTextEdit2("", nil)
-	document.ConnectTextChanged(func() {
-		s := document.ToPlainText()
-		rs.Notify(s)
-	})
-
-	invite := widgets.NewQPushButton2("Invite", nil)
-	invite.ConnectClicked(func(bool) {
-		configWindow := widgets.NewQDialog(nil, 0)
-		configWindow.SetWindowTitle("Invite Configuration")
-		configWindow.SetModal(true)
-		configWindow.SetFixedSize2(300, 100)
-
-		layout := widgets.NewQVBoxLayout()
-
-		hostLabel := widgets.NewQLabel2("Host", nil, 0)
-		hostEntry := widgets.NewQLineEdit(nil)
-		layout.AddWidget(hostLabel, 0, 0)
-		layout.AddWidget(hostEntry, 0, 0)
-
-		portLabel := widgets.NewQLabel2("Port", nil, 0)
-		portEntry := widgets.NewQLineEdit(nil)
-		layout.AddWidget(portLabel, 0, 0)
-		layout.AddWidget(portEntry, 0, 0)
-
-		btn := widgets.NewQPushButton2("Invite", nil)
-		btn.ConnectClicked(func(bool) {
-			addr := hostEntry.Text() + ":" + portEntry.Text()
+		hostLabel := widget.NewLabel("Host")
+		hostEntry := widget.NewEntry()
+		portLabel := widget.NewLabel("Port")
+		portEntry := widget.NewEntry()
+		inviteBtn := widget.NewButton("Invite", func() {
+			addr := hostEntry.Text + ":" + portEntry.Text
 			rs.Invite(addr, document)
+			configWindow.Close()
 		})
-		layout.AddWidget(btn, 0, 0)
 
-		configWindow.SetLayout(layout)
+		container := container.NewVBox(
+			hostLabel, hostEntry,
+			portLabel, portEntry,
+			inviteBtn,
+		)
+		configWindow.SetContent(container)
 		configWindow.Show()
 	})
 
-	layout.AddWidget(invite, 0, 0)
-	layout.AddWidget(document, 0, 0)
+	content := container.NewVBox(invite, document)
+	w.SetContent(content)
 
 	go refresh(document, rs)
 
-	// Start the GUI
-	window.Show()
-	app.Exec()
-
+	w.ShowAndRun()
 }

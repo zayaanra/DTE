@@ -1,11 +1,14 @@
 package api
 
-import "github.com/therecipe/qt/widgets"
+import (
+	"fyne.io/fyne/v2/widget"
+	"github.com/therecipe/qt/widgets"
+)
 
 type REDServer interface {
 	// Invites a peer to their editing session using the given address. It returns an error if it the invitation was not possible.
 	// It also opens an editing session.
-	Invite(addr string, doc *widgets.QPlainTextEdit) error
+	Invite(addr string, doc *widget.Entry) error
 
 	// Accepts an invitation from a peer. Upon accepting, the sender of the invite is added as a peer to the receipient's list of peers.
 	Accept()
