@@ -3,11 +3,8 @@ package red
 import (
 	"log"
 
-	"fyne.io/fyne/v2/widget"
-	"github.com/therecipe/qt/widgets"
 	"github.com/zayaanra/RED/api"
 	"github.com/zayaanra/RED/internal/handler"
-	"github.com/zayaanra/RED/internal/session"
 )
 
 type RServer struct {
@@ -19,9 +16,6 @@ type RServer struct {
 
 	// List of peers that are connected to this REDServer's editing session
 	peers []string
-
-	// The editing session for this REDServer
-	session *session.Session
 
 	// Used to send the GUI necessary updates to catch up with it's peers editing session
 	updates chan string
@@ -40,7 +34,7 @@ func NewREDServer(addr string, updates chan string) (api.REDServer, error) {
 	}
 
 	peers := []string{}
-	rs := &RServer{addr, rh, peers, nil, updates, false}
+	rs := &RServer{addr, rh, peers, updates, false}
 	go func(rh *handler.Handler) {
 		for {
 			select {
@@ -67,27 +61,16 @@ func NewREDServer(addr string, updates chan string) (api.REDServer, error) {
 }
 
 // Invites a peer to their editing session by sending an INVITE message.
-func (rs *RServer) Invite(addr string, doc *widget.Entry) error {
+func (rs *RServer) Invite(addr string) error {
 	smsg := &api.REDMessage{Type: api.MessageType_INVITE, Sender: rs.addr, Receipient: addr}
 	err := rs.handler.Send(smsg, addr)
 	rs.peers = append(rs.peers, addr)
-
-	// An editing session is only opened when more than one user is participating in it.
-	// It cannot be opened more than once.
-	// if rs.session == nil {
-	// 	rs.Open(doc)
-	// }
 
 	return err
 }
 
 // Accepts an invitation from a peer.
 func (rs *RServer) Accept() {
-}
-
-// Opens an editing session for this REDServer.
-func (rs *RServer) Open(doc *widgets.QPlainTextEdit) {
-	rs.session = session.NewSession(doc)
 }
 
 // Notifies all peers in this editing session of an EDIT.
@@ -99,7 +82,7 @@ func (rs *RServer) Notify(text string) {
 	}
 }
 
-// Fetches the most recent text updates needed for the GUI.
+// Fetches the channel on which text updates are placed on.
 func (rs *RServer) Fetch() (updates chan string) {
 	return rs.updates
 }
@@ -108,6 +91,5 @@ func (rs *RServer) Fetch() (updates chan string) {
 func (rs *RServer) Terminate() {
 	rs.terminated = true
 	close(rs.updates)
-	// rs.session.Close()
 	rs.handler.Terminate()
 }

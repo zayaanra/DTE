@@ -9,13 +9,14 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/zayaanra/RED/api"
 	"github.com/zayaanra/RED/internal/red"
 )
 
 func run(comms chan<- api.REDServer) {
-	// TODO - everything below here is the actual server code, it will be used once the user clicks the server start button
 	if len(os.Args) != 2 {
 		fmt.Fprintf(os.Stderr, "usage: ./server port")
 	} else {
@@ -64,37 +65,55 @@ func main() {
 
 	a := app.New()
 	w := a.NewWindow("RED Editor")
+	w.Resize(fyne.NewSize(500, 500))
 
 	document := widget.NewMultiLineEntry()
+	documentContainer := container.NewScroll(document)
+	documentContainer.Resize(fyne.NewSize(1000, 1000)) // Set the initial document size
+
 	document.OnChanged = func(s string) {
 		rs.Notify(strings.TrimSpace(s))
 	}
 
-	invite := widget.NewButton("Invite", func() {
-		configWindow := a.NewWindow("Invite Configuration")
-		size := fyne.NewSize(300, 150)
-		configWindow.Resize(size)
+	toolbar := widget.NewToolbar(
+		widget.NewToolbarAction(theme.DocumentCreateIcon(), func() {
+			log.Println("New document")
+		}),
+		widget.NewToolbarSeparator(),
+		widget.NewToolbarAction(theme.ContentCutIcon(), func() {}),
+		widget.NewToolbarAction(theme.ContentCopyIcon(), func() {}),
+		widget.NewToolbarAction(theme.ContentPasteIcon(), func() {}),
+		widget.NewToolbarSpacer(),
+		widget.NewToolbarAction(theme.MailSendIcon(), func() {
+			configWindow := a.NewWindow("Invite Configuration")
+			size := fyne.NewSize(300, 150)
+			configWindow.Resize(size)
 
-		hostLabel := widget.NewLabel("Host")
-		hostEntry := widget.NewEntry()
-		portLabel := widget.NewLabel("Port")
-		portEntry := widget.NewEntry()
-		inviteBtn := widget.NewButton("Invite", func() {
-			addr := hostEntry.Text + ":" + portEntry.Text
-			rs.Invite(addr, document)
-			configWindow.Close()
-		})
+			hostLabel := widget.NewLabel("Host")
+			hostEntry := widget.NewEntry()
+			portLabel := widget.NewLabel("Port")
+			portEntry := widget.NewEntry()
+			inviteBtn := widget.NewButton("Invite", func() {
+				addr := hostEntry.Text + ":" + portEntry.Text
+				rs.Invite(addr)
+				configWindow.Close()
+			})
 
-		container := container.NewVBox(
-			hostLabel, hostEntry,
-			portLabel, portEntry,
-			inviteBtn,
-		)
-		configWindow.SetContent(container)
-		configWindow.Show()
-	})
+			container := container.NewVBox(
+				hostLabel, hostEntry,
+				portLabel, portEntry,
+				inviteBtn,
+			)
+			configWindow.SetContent(container)
+			configWindow.Show()
+		}),
+	)
 
-	content := container.NewVBox(invite, document)
+	content := fyne.NewContainerWithLayout(
+		layout.NewBorderLayout(toolbar, nil, nil, nil),
+		toolbar,
+		documentContainer,
+	)
 	w.SetContent(content)
 
 	go refresh(document, rs)

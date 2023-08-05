@@ -5,7 +5,6 @@ go 1.20
 require (
 	fyne.io/fyne/v2 v2.3.5
 	github.com/golang/protobuf v1.5.3
-	github.com/therecipe/qt v0.0.0-20200904063919-c0c124a5770d
 )
 
 require (
