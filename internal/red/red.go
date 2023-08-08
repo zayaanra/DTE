@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/zayaanra/RED/api"
+	"github.com/zayaanra/RED/internal/crdt"
 	"github.com/zayaanra/RED/internal/handler"
 )
 
@@ -20,6 +21,8 @@ type RServer struct {
 	// Used to send the GUI necessary updates to catch up with it's peers editing session
 	updates chan string
 
+	crdt *crdt.CRDT
+
 	// Denotes if this REDServer has been terminated
 	terminated bool
 }
@@ -33,8 +36,10 @@ func NewREDServer(addr string, updates chan string) (api.REDServer, error) {
 		return nil, err
 	}
 
+	crdt := crdt.NewCRDT()
+
 	peers := []string{}
-	rs := &RServer{addr, rh, peers, updates, false}
+	rs := &RServer{addr, rh, peers, updates, crdt, false}
 	go func(rh *handler.Handler) {
 		for {
 			select {
@@ -51,8 +56,7 @@ func NewREDServer(addr string, updates chan string) (api.REDServer, error) {
 				// Receiveing an EDIT means that we must send the GUI the text update needed for the edtiro.
 				case api.MessageType_EDIT:
 					log.Printf("%s accepted an EDIT from %s\n", rs.addr, rmsg.Sender)
-					text := rmsg.Text
-					updates <- text
+					updates <- crdt.UpdateCRDT(rmsg)
 				}
 			}
 		}
@@ -74,8 +78,9 @@ func (rs *RServer) Accept() {
 }
 
 // Notifies all peers in this editing session of an EDIT.
-func (rs *RServer) Notify(text string) {
-	smsg := &api.REDMessage{Type: api.MessageType_EDIT, Sender: rs.addr, Text: text}
+func (rs *RServer) Notify(char byte, pos int, editType int) {
+	e := &api.Edit{Type: api.EditType(editType), Pos: int32(pos), Char: int32(char)}
+	smsg := &api.REDMessage{Type: api.MessageType_EDIT, Sender: rs.addr, Edit: e}
 	for _, peer := range rs.peers {
 		smsg.Receipient = peer
 		rs.handler.Send(smsg, peer)

@@ -9,7 +9,7 @@ type REDServer interface {
 
 	// Notifies all peers within this server's editing session of an update to the text editor.
 	// It sends an EDIT message containing the edits
-	Notify(text string)
+	Notify(char byte, pos int, editType int)
 
 	// Returns the updates channel which is a channel that sends text updates to the GUI.
 	Fetch() (updates chan string)
