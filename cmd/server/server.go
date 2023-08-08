@@ -57,6 +57,13 @@ func refresh(doc *widget.Entry, rs api.REDServer) {
 	}
 }
 
+func findDifference(old, new string) int {
+	var i int
+	for i = 0; i < len(old) && i < len(new); i++ {
+	}
+	return i
+}
+
 func main() {
 	rs := boot()
 	if rs == nil {
@@ -69,10 +76,27 @@ func main() {
 
 	document := widget.NewMultiLineEntry()
 	documentContainer := container.NewScroll(document)
-	documentContainer.Resize(fyne.NewSize(1000, 1000)) // Set the initial document size
+	documentContainer.Resize(fyne.NewSize(1000, 1000))
+
+	oldText := ""
 
 	document.OnChanged = func(s string) {
-		rs.Notify(strings.TrimSpace(s))
+		// TODO - local GUI not updating
+		newText := strings.TrimSpace(s)
+		cursorPos := findDifference(oldText, newText)
+		var editType int
+		if len(newText) > len(oldText) {
+			editType = int(api.EditType_INSERT)
+		} else {
+			editType = int(api.EditType_DELETE)
+		}
+		var char byte
+		if cursorPos == 0 {
+			char = 0x0
+		} else {
+			char = byte(newText[cursorPos])
+		}
+		rs.Notify(char, cursorPos, editType)
 	}
 
 	toolbar := widget.NewToolbar(
