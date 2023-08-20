@@ -81,7 +81,7 @@ func main() {
 	oldText := ""
 
 	document.OnChanged = func(s string) {
-		// TODO - local GUI not updating
+		// TODO - local GUI not updating because calling doc.setText causes a document.onChanged resulting in an infinite Notify() broadcast
 		newText := strings.TrimSpace(s)
 		cursorPos := findDifference(oldText, newText)
 		var editType int
