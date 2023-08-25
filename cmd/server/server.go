@@ -58,6 +58,10 @@ func findDifference(old, new string) int {
 	return i
 }
 
+func startREDServer() {
+
+}
+
 func main() {
 	// rs := boot()
 	// if rs == nil {
@@ -82,6 +86,40 @@ func main() {
 	}
 	mainWindow.Connect("destroy", func() {
 		gtk.MainQuit()
+	})
+
+	obj, err = builder.GetObject("startBtn")
+	if err != nil {
+		log.Fatal("Error getting button:", err)
+	}
+	startBtn, _ := obj.(*gtk.Button)
+	obj, err = builder.GetObject("hostEntry")
+	if err != nil {
+		log.Fatal("Error getting entry1:", err)
+	}
+	hostEntry, _ := obj.(*gtk.Entry)
+
+	obj, err = builder.GetObject("portEntry")
+	if err != nil {
+		log.Fatal("Error getting entry2:", err)
+	}
+	portEntry, _ := obj.(*gtk.Entry)
+
+	// Connect signals
+	startBtn.Connect("clicked", func() {
+		host, _ := hostEntry.GetText()
+		port, _ := portEntry.GetText()
+		log.Printf("Attempting to boot server under %s"+":"+"%s", host, port)
+		// TODO - Start server
+		obj, err := builder.GetObject("docWindow")
+		if err != nil {
+			log.Printf("failed to get doc window - %v\n", err)
+		}
+		docWindow, ok := obj.(*gtk.Window)
+		if !ok {
+			log.Fatal("Error casting to window")
+		}
+		docWindow.ShowAll()
 	})
 
 	mainWindow.ShowAll()
