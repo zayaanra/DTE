@@ -1,5 +1,6 @@
 cmd/server/server
 cmd/server/qtbox
+cmd/server/gui.glade~
 
 api/messages.pb.go
 gui/messages_pb2.py

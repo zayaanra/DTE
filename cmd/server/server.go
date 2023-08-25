@@ -59,73 +59,33 @@ func findDifference(old, new string) int {
 }
 
 func main() {
-	rs := boot()
-	if rs == nil {
-		os.Exit(1)
-	}
+	// rs := boot()
+	// if rs == nil {
+	// 	os.Exit(1)
+	// }
 
 	gtk.Init(nil)
 
-	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+	builder, err := gtk.BuilderNewFromFile("cmd/server/gui.glade")
 	if err != nil {
-		log.Fatal("Unable to create window:", err)
-	}
-	win.SetTitle("RED Editor")
-	win.Connect("destroy", gtk.MainQuit)
-	win.SetDefaultSize(800, 600)
-
-	// Create a vertical box container
-	vBox, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
-	if err != nil {
-		log.Fatal("Unable to create box:", err)
+		log.Printf("failed to load glade file - %v\n", err)
 	}
 
-	// Create a toolbar
-	toolbar, err := gtk.ToolbarNew()
+	obj, err := builder.GetObject("main")
 	if err != nil {
-		log.Fatal("Unable to create toolbar:", err)
+		log.Printf("failed to get main window - %v\n", err)
 	}
-	// Add toolbar actions here (New document, Cut, Copy, Paste, Invite, etc.)
-	vBox.PackStart(toolbar, false, false, 0)
 
-	// Create a scrolled window
-	scrolledWindow, err := gtk.ScrolledWindowNew(nil, nil)
-	if err != nil {
-		log.Fatal("Unable to create scrolled window:", err)
+	mainWindow, ok := obj.(*gtk.Window)
+	if !ok {
+		log.Fatal("Error casting to window")
 	}
-	vBox.PackStart(scrolledWindow, true, true, 0)
-
-	// Create a multiline text view
-	textView, err := gtk.TextViewNew()
-	if err != nil {
-		log.Fatal("Unable to create text view:", err)
-	}
-	textBuffer, _ := textView.GetBuffer()
-	scrolledWindow.Add(textView)
-
-	// Create an "Invite" button
-	inviteButton, err := gtk.ButtonNewWithLabel("Invite")
-	if err != nil {
-		log.Fatal("Unable to create button:", err)
-	}
-	vBox.PackStart(inviteButton, false, false, 0)
-
-	// Handle the "Invite" button click event
-	inviteButton.Connect("clicked", func() {
-		// Implement your Invite button logic here
-		fmt.Println("Invite button clicked!")
+	mainWindow.Connect("destroy", func() {
+		gtk.MainQuit()
 	})
 
-	// Connect "changed" signal of the text buffer
-	textBuffer.Connect("changed", func() {
-		// Handle text buffer changes here
-		// You can get the text from the buffer using textBuffer.GetText()
-	})
+	mainWindow.ShowAll()
 
-	// Add the vertical box container to the window
-	win.Add(vBox)
-
-	win.ShowAll()
 	gtk.Main()
 
 }
