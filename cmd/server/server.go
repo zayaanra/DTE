@@ -10,35 +10,28 @@ import (
 	"github.com/zayaanra/RED/internal/red"
 )
 
-func run(comms chan<- api.REDServer) {
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "usage: ./server port")
-	} else {
-		// Parse the port and start a REDServer under that port
-		addr := os.Args[1]
-		updates := make(chan string)
-		rs, err := red.NewREDServer(addr, updates)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "REDServer failed to start up")
-			comms <- nil
-			return
-		}
-		comms <- rs
-
-		// Read from stdin until we hit EOF. Then, we can safely terminate our REDServer.
-		os.Stdin.Read(make([]byte, 1))
-		log.Println("Terminating server...")
-		close(comms)
-		rs.Terminate()
+func run(comms chan<- api.REDServer, addr string) {
+	updates := make(chan string)
+	rs, err := red.NewREDServer(addr, updates)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "REDServer failed to start up")
+		comms <- nil
+		return
 	}
+	comms <- rs
+
+	// Read from stdin until we hit EOF. Then, we can safely terminate our REDServer.
+	os.Stdin.Read(make([]byte, 1))
+	close(comms)
+	rs.Terminate()
 }
 
-func boot() api.REDServer {
+func boot(addr string) api.REDServer {
 	comms := make(chan api.REDServer)
 
 	// Run the server
 	log.Println("Running server...")
-	go run(comms)
+	go run(comms, addr)
 
 	rs := <-comms
 	return rs
@@ -58,16 +51,7 @@ func findDifference(old, new string) int {
 	return i
 }
 
-func startREDServer() {
-
-}
-
 func main() {
-	// rs := boot()
-	// if rs == nil {
-	// 	os.Exit(1)
-	// }
-
 	gtk.Init(nil)
 
 	builder, err := gtk.BuilderNewFromFile("cmd/server/gui.glade")
@@ -109,7 +93,14 @@ func main() {
 	startBtn.Connect("clicked", func() {
 		host, _ := hostEntry.GetText()
 		port, _ := portEntry.GetText()
+		addr := host + ":" + port
 		log.Printf("Attempting to boot server under %s"+":"+"%s", host, port)
+
+		rs := boot(addr)
+		if rs == nil {
+			os.Exit(1)
+		}
+
 		// TODO - Start server
 		obj, err := builder.GetObject("docWindow")
 		if err != nil {

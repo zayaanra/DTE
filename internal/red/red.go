@@ -94,6 +94,7 @@ func (rs *RServer) Fetch() (updates chan string) {
 
 // Terminates the REDServer. It closes any resources that are currently being used.
 func (rs *RServer) Terminate() {
+	log.Println("Terminating server...")
 	rs.terminated = true
 	close(rs.updates)
 	rs.handler.Terminate()
