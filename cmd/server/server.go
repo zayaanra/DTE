@@ -51,6 +51,13 @@ func findDifference(old, new string) int {
 	return i
 }
 
+// TODO - Need to send EDIT message to peers
+func documentUpdated(buffer *gtk.TextBuffer) {
+	startIter, endIter := buffer.GetBounds()
+	text, _ := buffer.GetText(startIter, endIter, false)
+	fmt.Println("Text changed:", text)
+}
+
 func main() {
 	gtk.Init(nil)
 
@@ -72,45 +79,62 @@ func main() {
 		gtk.MainQuit()
 	})
 
-	obj, err = builder.GetObject("startBtn")
-	if err != nil {
-		log.Fatal("Error getting button:", err)
-	}
+	obj, _ = builder.GetObject("startBtn")
 	startBtn, _ := obj.(*gtk.Button)
-	obj, err = builder.GetObject("hostEntry")
-	if err != nil {
-		log.Fatal("Error getting entry1:", err)
-	}
-	hostEntry, _ := obj.(*gtk.Entry)
 
-	obj, err = builder.GetObject("portEntry")
-	if err != nil {
-		log.Fatal("Error getting entry2:", err)
-	}
+	obj, _ = builder.GetObject("hostEntry")
+	hostEntry, _ := obj.(*gtk.Entry)
+	obj, _ = builder.GetObject("portEntry")
 	portEntry, _ := obj.(*gtk.Entry)
 
-	// Connect signals
+	var rs api.REDServer
+
 	startBtn.Connect("clicked", func() {
 		host, _ := hostEntry.GetText()
 		port, _ := portEntry.GetText()
 		addr := host + ":" + port
-		log.Printf("Attempting to boot server under %s"+":"+"%s", host, port)
+		log.Printf("Attempting to boot server under %s", addr)
 
-		rs := boot(addr)
+		rs = boot(addr)
 		if rs == nil {
 			os.Exit(1)
 		}
 
-		// TODO - Start server
-		obj, err := builder.GetObject("docWindow")
-		if err != nil {
-			log.Printf("failed to get doc window - %v\n", err)
-		}
-		docWindow, ok := obj.(*gtk.Window)
-		if !ok {
-			log.Fatal("Error casting to window")
-		}
+		obj, _ := builder.GetObject("docWindow")
+		docWindow, _ := obj.(*gtk.Window)
+
+		obj, _ = builder.GetObject("textView")
+		textView, _ := obj.(*gtk.TextView)
+		buffer, _ := gtk.TextBufferNew(nil)
+		textView.SetBuffer(buffer)
+		buffer.Connect("changed", func() {
+			documentUpdated(buffer)
+		})
 		docWindow.ShowAll()
+	})
+
+	obj, _ = builder.GetObject("inviteBtn")
+	inviteBtn, _ := obj.(*gtk.ToolButton)
+	inviteBtn.Connect("clicked", func() {
+		obj, _ = builder.GetObject("inviteWindow")
+		inviteWindow := obj.(*gtk.Window)
+		inviteWindow.ShowAll()
+
+		obj, _ = builder.GetObject("sendInvBtn")
+		sendInvBtn := obj.(*gtk.Button)
+
+		sendInvBtn.Connect("clicked", func() {
+			// Invite the peer with the given peer address
+			obj, _ = builder.GetObject("hostEntry2")
+			hostEntry, _ := obj.(*gtk.Entry)
+			obj, _ = builder.GetObject("portEntry2")
+			portEntry, _ := obj.(*gtk.Entry)
+			host, _ := hostEntry.GetText()
+			port, _ := portEntry.GetText()
+			addr := host + ":" + port
+			rs.Invite(addr)
+			inviteWindow.Close()
+		})
 	})
 
 	mainWindow.ShowAll()
