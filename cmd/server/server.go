@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"log"
 	"os"
@@ -37,10 +38,11 @@ func boot(addr string) api.REDServer {
 	return rs
 }
 
-func refresh(doc *gtk.Entry, rs api.REDServer) {
+func refresh(doc *gtk.TextBuffer, rs api.REDServer) {
 	updates := rs.Fetch()
 	for text := range updates {
-		doc.SetText(text)
+		// TODO - bug here
+		doc.SetText(hex.EncodeToString([]byte(text)))
 	}
 }
 
@@ -52,10 +54,38 @@ func findDifference(old, new string) int {
 }
 
 // TODO - Need to send EDIT message to peers
-func documentUpdated(buffer *gtk.TextBuffer) {
-	startIter, endIter := buffer.GetBounds()
-	text, _ := buffer.GetText(startIter, endIter, false)
-	fmt.Println("Text changed:", text)
+func documentUpdated(rs api.REDServer, doc *gtk.TextBuffer, oldText string) func() {
+	startIter, endIter := doc.GetBounds()
+	text, _ := doc.GetText(startIter, endIter, false)
+
+	var char byte
+	var pos int
+	// Find insertions and deletions between the strings
+	for i := 0; i < len(text) || i < len(oldText); i++ {
+		if i >= len(text) {
+			char = oldText[i]
+			pos = i
+			break
+		} else if i >= len(oldText) {
+			char = text[i]
+			pos = i
+			break
+		} else if oldText[i] != text[i] {
+			char = text[i]
+			pos = i
+			break
+		}
+	}
+
+	if len(text) > len(oldText) {
+		rs.Notify(char, pos, int(api.EditType_INSERT))
+	} else {
+		rs.Notify(char, pos, int(api.EditType_DELETE))
+	}
+
+	return func() {
+		fmt.Println("Text changed:", text)
+	}
 }
 
 func main() {
@@ -82,19 +112,15 @@ func main() {
 	obj, _ = builder.GetObject("startBtn")
 	startBtn, _ := obj.(*gtk.Button)
 
-	obj, _ = builder.GetObject("hostEntry")
-	hostEntry, _ := obj.(*gtk.Entry)
-	obj, _ = builder.GetObject("portEntry")
-	portEntry, _ := obj.(*gtk.Entry)
+	obj, _ = builder.GetObject("serverEntry")
+	serverEntry, _ := obj.(*gtk.Entry)
 
 	var rs api.REDServer
 
 	startBtn.Connect("clicked", func() {
-		host, _ := hostEntry.GetText()
-		port, _ := portEntry.GetText()
-		addr := host + ":" + port
-		log.Printf("Attempting to boot server under %s", addr)
 
+		addr, _ := serverEntry.GetText()
+		log.Printf("Attempting to boot server under %s", addr)
 		rs = boot(addr)
 		if rs == nil {
 			os.Exit(1)
@@ -106,35 +132,30 @@ func main() {
 		obj, _ = builder.GetObject("textView")
 		textView, _ := obj.(*gtk.TextView)
 		buffer, _ := gtk.TextBufferNew(nil)
+
+		var oldText string
+
 		textView.SetBuffer(buffer)
 		buffer.Connect("changed", func() {
-			documentUpdated(buffer)
+			buffer.GetInsert()
+			documentUpdated(rs, buffer, oldText)
+			startIter, endIter := buffer.GetBounds()
+			oldText, _ = buffer.GetText(startIter, endIter, false)
 		})
+
+		go refresh(buffer, rs)
+
 		docWindow.ShowAll()
 	})
 
 	obj, _ = builder.GetObject("inviteBtn")
 	inviteBtn, _ := obj.(*gtk.ToolButton)
 	inviteBtn.Connect("clicked", func() {
-		obj, _ = builder.GetObject("inviteWindow")
-		inviteWindow := obj.(*gtk.Window)
-		inviteWindow.ShowAll()
-
-		obj, _ = builder.GetObject("sendInvBtn")
-		sendInvBtn := obj.(*gtk.Button)
-
-		sendInvBtn.Connect("clicked", func() {
-			// Invite the peer with the given peer address
-			obj, _ = builder.GetObject("hostEntry2")
-			hostEntry, _ := obj.(*gtk.Entry)
-			obj, _ = builder.GetObject("portEntry2")
-			portEntry, _ := obj.(*gtk.Entry)
-			host, _ := hostEntry.GetText()
-			port, _ := portEntry.GetText()
-			addr := host + ":" + port
-			rs.Invite(addr)
-			inviteWindow.Close()
-		})
+		// Invite the peer with the given peer address
+		obj, _ = builder.GetObject("invEntry")
+		invEntry, _ := obj.(*gtk.Entry)
+		addr, _ := invEntry.GetText()
+		rs.Invite(addr)
 	})
 
 	mainWindow.ShowAll()

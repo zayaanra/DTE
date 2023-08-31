@@ -56,6 +56,24 @@
                 <property name="homogeneous">True</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkToolItem" id="hostEntry1">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkEntry" id="invEntry">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="xalign">0.5</property>
+                    <property name="placeholder-text" translatable="yes">host:port</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -72,66 +90,6 @@
             <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="inviteWindow">
-    <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Invite Configuration</property>
-    <property name="resizable">False</property>
-    <property name="window-position">center</property>
-    <property name="default-width">400</property>
-    <property name="default-height">300</property>
-    <child>
-      <object class="GtkBox" id="main_box1">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="halign">center</property>
-        <property name="valign">center</property>
-        <property name="margin-start">50</property>
-        <property name="margin-end">50</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">25</property>
-        <child>
-          <object class="GtkEntry" id="hostEntry2">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="xalign">0.5</property>
-            <property name="placeholder-text" translatable="yes">Host</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="portEntry2">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="xalign">0.5</property>
-            <property name="placeholder-text" translatable="yes">Port</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="sendInvBtn">
-            <property name="label">Invite</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="margin-bottom">50</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">2</property>
           </packing>
         </child>
       </object>
@@ -155,29 +113,16 @@
         <property name="orientation">vertical</property>
         <property name="spacing">25</property>
         <child>
-          <object class="GtkEntry" id="hostEntry">
+          <object class="GtkEntry" id="serverEntry">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="xalign">0.5</property>
-            <property name="placeholder-text" translatable="yes">Host</property>
+            <property name="placeholder-text" translatable="yes">host:port</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="portEntry">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="xalign">0.5</property>
-            <property name="placeholder-text" translatable="yes">Port</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
           </packing>
         </child>
         <child>
