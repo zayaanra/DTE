@@ -1,6 +1,8 @@
 package crdt
 
-import "github.com/zayaanra/RED/api"
+import (
+	"github.com/zayaanra/RED/api"
+)
 
 // A "pair" represents the combination of an index and pid for a single edit in a document.
 // The char represents the character at this position.
@@ -53,5 +55,11 @@ func (crdt *CRDT) Stringify() string {
 	for _, pair := range crdt.pairs {
 		bytes = append(bytes, pair.char)
 	}
-	return string(bytes)
+	var result []byte
+	for _, b := range bytes {
+		if b != 0 {
+			result = append(result, b)
+		}
+	}
+	return string(result)
 }

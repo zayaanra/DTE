@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
 	"log"
 	"os"
@@ -38,13 +37,13 @@ func boot(addr string) api.REDServer {
 	return rs
 }
 
-func refresh(doc *gtk.TextBuffer, rs api.REDServer) {
-	updates := rs.Fetch()
-	for text := range updates {
-		// TODO - bug here
-		doc.SetText(hex.EncodeToString([]byte(text)))
-	}
-}
+// func refresh(doc *gtk.TextBuffer, rs api.REDServer, handler *glib.SignalHandle) {
+// 	updates := rs.Fetch()
+// 	for text := range updates {
+// 		doc.HandlerDisconnect(*handler)
+// 		doc.SetText(text)
+// 	}
+// }
 
 func findDifference(old, new string) int {
 	var i int
@@ -56,7 +55,7 @@ func findDifference(old, new string) int {
 // TODO - Need to send EDIT message to peers
 func documentUpdated(rs api.REDServer, doc *gtk.TextBuffer, oldText string) func() {
 	startIter, endIter := doc.GetBounds()
-	text, _ := doc.GetText(startIter, endIter, false)
+	text, _ := doc.GetText(startIter, endIter, true)
 
 	var char byte
 	var pos int
@@ -136,14 +135,27 @@ func main() {
 		var oldText string
 
 		textView.SetBuffer(buffer)
-		buffer.Connect("changed", func() {
+		handler := buffer.Connect("changed", func() {
 			buffer.GetInsert()
 			documentUpdated(rs, buffer, oldText)
 			startIter, endIter := buffer.GetBounds()
 			oldText, _ = buffer.GetText(startIter, endIter, false)
 		})
 
-		go refresh(buffer, rs)
+		//go refresh(buffer, rs, &handler)
+		go func() {
+			updates := rs.Fetch()
+			for text := range updates {
+				buffer.HandlerDisconnect(handler)
+				buffer.SetText(text)
+				handler = buffer.Connect("changed", func() {
+					buffer.GetInsert()
+					documentUpdated(rs, buffer, oldText)
+					startIter, endIter := buffer.GetBounds()
+					oldText, _ = buffer.GetText(startIter, endIter, false)
+				})
+			}
+		}()
 
 		docWindow.ShowAll()
 	})

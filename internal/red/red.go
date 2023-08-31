@@ -56,7 +56,8 @@ func NewREDServer(addr string, updates chan string) (api.REDServer, error) {
 				// Receiveing an EDIT means that we must send the GUI the text update needed for the edtiro.
 				case api.MessageType_EDIT:
 					log.Printf("%s accepted an EDIT from %s\n", rs.addr, rmsg.Sender)
-					updates <- crdt.UpdateCRDT(rmsg)
+					text := crdt.UpdateCRDT(rmsg)
+					updates <- text
 				}
 			}
 		}
