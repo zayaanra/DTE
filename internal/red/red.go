@@ -2,6 +2,7 @@ package red
 
 import (
 	"log"
+	"sync"
 
 	"github.com/zayaanra/RED/api"
 	"github.com/zayaanra/RED/internal/crdt"
@@ -25,6 +26,8 @@ type RServer struct {
 
 	// Denotes if this REDServer has been terminated
 	terminated bool
+
+	mutex sync.Mutex
 }
 
 // Create a new RED server associated with the given address.
@@ -37,9 +40,15 @@ func NewREDServer(addr string, updates chan string) (api.REDServer, error) {
 	}
 
 	crdt := crdt.NewCRDT()
-
 	peers := []string{}
-	rs := &RServer{addr, rh, peers, updates, crdt, false}
+	rs := &RServer{}
+	rs.addr = addr
+	rs.handler = rh
+	rs.peers = peers
+	rs.updates = updates
+	rs.crdt = crdt
+	rs.terminated = false
+
 	go func(rh *handler.Handler) {
 		for {
 			select {
@@ -72,10 +81,6 @@ func (rs *RServer) Invite(addr string) error {
 	rs.peers = append(rs.peers, addr)
 
 	return err
-}
-
-// Accepts an invitation from a peer.
-func (rs *RServer) Accept() {
 }
 
 // Notifies all peers in this editing session of an EDIT.

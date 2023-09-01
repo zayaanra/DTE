@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/zayaanra/RED/api"
@@ -52,7 +53,6 @@ func findDifference(old, new string) int {
 	return i
 }
 
-// TODO - Need to send EDIT message to peers
 func documentUpdated(rs api.REDServer, doc *gtk.TextBuffer, oldText string) func() {
 	startIter, endIter := doc.GetBounds()
 	text, _ := doc.GetText(startIter, endIter, true)
@@ -117,9 +117,7 @@ func main() {
 	var rs api.REDServer
 
 	startBtn.Connect("clicked", func() {
-
 		addr, _ := serverEntry.GetText()
-		log.Printf("Attempting to boot server under %s", addr)
 		rs = boot(addr)
 		if rs == nil {
 			os.Exit(1)
@@ -131,29 +129,28 @@ func main() {
 		obj, _ = builder.GetObject("textView")
 		textView, _ := obj.(*gtk.TextView)
 		buffer, _ := gtk.TextBufferNew(nil)
+		textView.SetBuffer(buffer)
 
 		var oldText string
+		var bufferMutex sync.Mutex
+		var mutex sync.Mutex
 
-		textView.SetBuffer(buffer)
 		handler := buffer.Connect("changed", func() {
-			buffer.GetInsert()
+			mutex.Lock()
+			defer mutex.Unlock()
 			documentUpdated(rs, buffer, oldText)
 			startIter, endIter := buffer.GetBounds()
 			oldText, _ = buffer.GetText(startIter, endIter, false)
 		})
 
-		//go refresh(buffer, rs, &handler)
 		go func() {
 			updates := rs.Fetch()
 			for text := range updates {
-				buffer.HandlerDisconnect(handler)
+				bufferMutex.Lock()
+				buffer.HandlerBlock(handler)
 				buffer.SetText(text)
-				handler = buffer.Connect("changed", func() {
-					buffer.GetInsert()
-					documentUpdated(rs, buffer, oldText)
-					startIter, endIter := buffer.GetBounds()
-					oldText, _ = buffer.GetText(startIter, endIter, false)
-				})
+				buffer.HandlerUnblock(handler)
+				bufferMutex.Unlock()
 			}
 		}()
 

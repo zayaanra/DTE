@@ -1,6 +1,8 @@
 package crdt
 
 import (
+	"sync"
+
 	"github.com/zayaanra/RED/api"
 )
 
@@ -19,15 +21,20 @@ type Pair struct {
 type CRDT struct {
 	counter int
 	pairs   []*Pair
+	mutex   sync.Mutex
 }
 
 func NewCRDT() *CRDT {
-	crdt := CRDT{0, make([]*Pair, 0)}
+	crdt := CRDT{}
+	crdt.counter = 0
+	crdt.pairs = make([]*Pair, 0)
 	return &crdt
 }
 
 // Increments the document's counter.
 func (crdt *CRDT) Increment() {
+	crdt.mutex.Lock()
+	defer crdt.mutex.Unlock()
 	crdt.counter += 1
 }
 
@@ -43,14 +50,18 @@ func (crdt *CRDT) UpdateCRDT(rmsg *api.REDMessage) string {
 
 // Insert the given character at the specified position.
 func (crdt *CRDT) Insert(char byte, pos int, pid []byte) string {
+	crdt.mutex.Lock()
 	pair := &Pair{char, pos, pid}
 	crdt.pairs = append(crdt.pairs, pair)
+	crdt.mutex.Unlock()
 	// TODO - We're assuming there is no conflict for now. So let's send the updated text anyways.
 	return crdt.Stringify()
 }
 
 // Converts the document into a string. Useful for debugging.
 func (crdt *CRDT) Stringify() string {
+	crdt.mutex.Lock()
+	defer crdt.mutex.Unlock()
 	bytes := make([]byte, len(crdt.pairs))
 	for _, pair := range crdt.pairs {
 		bytes = append(bytes, pair.char)
