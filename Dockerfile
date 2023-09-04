@@ -5,7 +5,6 @@ WORKDIR /app
 COPY . .
 
 RUN go mod download
-RUN apt-get update && apt-get install -y libgl1-mesa-dev xorg-dev x11-apps dbus-x11 xvfb make
-RUN make
+RUN apt-get update && apt-get install -y libgtk-3-dev libcairo2-dev libglib2.0-dev
 
-ENTRYPOINT ["./cmd/server/server"]
+CMD ["./cmd/server/server"]
